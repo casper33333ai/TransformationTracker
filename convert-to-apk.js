@@ -12,18 +12,27 @@ async function startForge() {
   log('🚀 Starten van build proces voor: https://ai.studio/apps/drive/1BNWwLtp83Lrj8hnBWKgLcIMdmdK27e-a');
 
   try {
-    // 1. Web Assets voorbereiden (Capacitor eis)
+    // 1. Web Assets voorbereiden
     if (!fs.existsSync('www')) fs.mkdirSync('www', { recursive: true });
-    fs.writeFileSync(path.join('www', 'index.html'), '<!DOCTYPE html><html><body><script>window.location.href="https://ai.studio/apps/drive/1BNWwLtp83Lrj8hnBWKgLcIMdmdK27e-a"</script></body></html>');
+    // We maken een simpele loader voor het geval de server.url config faalt
+    fs.writeFileSync(path.join('www', 'index.html'), '<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body style="background:#000;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;color:#fff;font-family:sans-serif;"><div>Laden...</div><script>window.location.href="https://ai.studio/apps/drive/1BNWwLtp83Lrj8hnBWKgLcIMdmdK27e-a"</script></body></html>');
 
-    // 2. Capacitor Initialisatie
+    // 2. Capacitor Initialisatie met WebView Forceer-instellingen
     log('⚙️ Capacitor configureren...');
     const capConfig = {
-      appId: "com.forge.myapp",
-      appName: "MijnNativeApp",
+      appId: "com.forge.transformationtracker",
+      appName: "TransformationTracker ",
       webDir: "www",
-      server: { url: "https://ai.studio/apps/drive/1BNWwLtp83Lrj8hnBWKgLcIMdmdK27e-a", cleartext: true },
-      android: { allowMixedContent: true }
+      server: { 
+        url: "https://ai.studio/apps/drive/1BNWwLtp83Lrj8hnBWKgLcIMdmdK27e-a", 
+        cleartext: true,
+        // CRUCIAAL: Dit zorgt ervoor dat de website BINNEN de app blijft
+        allowNavigation: ["*"] 
+      },
+      android: { 
+        allowMixedContent: true,
+        captureInput: true
+      }
     };
     fs.writeFileSync('capacitor.config.json', JSON.stringify(capConfig, null, 2));
 
